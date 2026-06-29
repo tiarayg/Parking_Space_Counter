@@ -13,7 +13,7 @@ cap1 = cv2.VideoCapture('carPark.mp4')
 with open('CarParkPos', 'rb') as f:
     posList1 = pickle.load(f)
 
-# UKURAN ASLI VIDEO 1 (JANGAN DIUBAH)
+# UKURAN ASLI VIDEO 1
 width1, height1 = 107, 48
 
 slotStatus1 = {str(pos): False for pos in posList1}
@@ -27,7 +27,7 @@ cap2 = cv2.VideoCapture('carPark2.mp4')
 with open('CarParkPos1', 'rb') as f:
     posList2 = pickle.load(f)
 
-# UKURAN SLOT VIDEO 2
+# UKURAN VIDEO 2
 widthV, heightV = 88, 165
 widthH, heightH = 165, 88
 
@@ -100,6 +100,7 @@ def drawMiniMap(img, posList, slotStatus):
 
     for pos in posList:
 
+        # VIDEO 2
         if len(pos) == 3:
 
             x, y, mode = pos
@@ -109,6 +110,7 @@ def drawMiniMap(img, posList, slotStatus):
             else:
                 w, h = widthH, heightH
 
+        # VIDEO 1
         else:
 
             x, y = pos
@@ -127,7 +129,7 @@ def drawMiniMap(img, posList, slotStatus):
         cv2.rectangle(img, (mx, my), (mx + mw, my + mh), (50, 50, 50), 1)
 
 # ==========================================
-# VIDEO 1 CHECK
+# CHECK VIDEO 1
 # ==========================================
 
 def checkParkingSpace1(img, imgPro):
@@ -187,7 +189,7 @@ def checkParkingSpace1(img, imgPro):
     )
 
 # ==========================================
-# VIDEO 2 CHECK
+# CHECK VIDEO 2
 # ==========================================
 
 def checkParkingSpace2(img, imgPro):
@@ -302,7 +304,7 @@ def processFrame2(cap):
     if not success:
         return None, None
 
-    # KHUSUS VIDEO 2
+    # RESIZE KHUSUS VIDEO 2
     img = cv2.resize(img, (1280, 720))
 
     imgGray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -332,23 +334,87 @@ def processFrame2(cap):
 
 while True:
 
+    # ======================================
     # VIDEO 1
+    # ======================================
+
     img1, imgDilate1 = processFrame1(cap1)
 
     if img1 is not None:
 
         checkParkingSpace1(img1, imgDilate1)
 
+        # MINIMAP
+        drawMiniMap(img1, posList1, slotStatus1)
+
+        # TIMESTAMP
+        now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+        cv2.putText(
+            img1,
+            now,
+            (10, img1.shape[0] - 10),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            0.7,
+            (255, 255, 255),
+            2
+        )
+
+        # TITLE
+        cv2.putText(
+            img1,
+            "Parkiran 1",
+            (10, 30),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            0.8,
+            (255, 255, 0),
+            2
+        )
+
         cv2.imshow("Parkiran 1", img1)
 
+    # ======================================
     # VIDEO 2
+    # ======================================
+
     img2, imgDilate2 = processFrame2(cap2)
 
     if img2 is not None:
 
         checkParkingSpace2(img2, imgDilate2)
 
+        # MINIMAP
+        drawMiniMap(img2, posList2, slotStatus2)
+
+        # TIMESTAMP
+        now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+        cv2.putText(
+            img2,
+            now,
+            (10, img2.shape[0] - 10),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            0.7,
+            (255, 255, 255),
+            2
+        )
+
+        # TITLE
+        cv2.putText(
+            img2,
+            "Parkiran 2",
+            (10, 30),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            0.8,
+            (255, 255, 0),
+            2
+        )
+
         cv2.imshow("Parkiran 2", img2)
+
+    # ======================================
+    # EXIT
+    # ======================================
 
     if cv2.waitKey(10) & 0xFF == ord('q'):
         break
